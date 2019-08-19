@@ -788,7 +788,7 @@ where
     pub fn reserve(&mut self, additional: usize) {
         match self.reserve_internal(additional, Infallible) {
             Err(CollectionAllocErr::CapacityOverflow) => panic!("capacity overflow"),
-            Err(CollectionAllocErr::AllocErr) => unreachable!(),
+            Err(CollectionAllocErr::AllocError { .. }) => unreachable!(),
             Ok(()) => { /* yay */ }
         }
     }

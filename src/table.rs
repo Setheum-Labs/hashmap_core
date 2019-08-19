@@ -707,7 +707,7 @@ impl<K, V> RawTable<K, V> {
         let buffer = Global.alloc(layout).map_err(|e| match fallibility {
             Infallible => handle_alloc_error(layout),
             Fallible => e,
-        })?;
+        }).map_err(|_| CollectionAllocErr::AllocError { layout, non_exhaustive: () })?;
 
         Ok(RawTable {
             capacity_mask: capacity.wrapping_sub(1),
@@ -722,7 +722,7 @@ impl<K, V> RawTable<K, V> {
     unsafe fn new_uninitialized(capacity: usize) -> RawTable<K, V> {
         match Self::new_uninitialized_internal(capacity, Infallible) {
             Err(CollectionAllocErr::CapacityOverflow) => panic!("capacity overflow"),
-            Err(CollectionAllocErr::AllocErr) => unreachable!(),
+            Err(CollectionAllocErr::AllocError { .. }) => unreachable!(),
             Ok(table) => table,
         }
     }
@@ -763,7 +763,7 @@ impl<K, V> RawTable<K, V> {
     pub fn new(capacity: usize) -> RawTable<K, V> {
         match Self::new_internal(capacity, Infallible) {
             Err(CollectionAllocErr::CapacityOverflow) => panic!("capacity overflow"),
-            Err(CollectionAllocErr::AllocErr) => unreachable!(),
+            Err(CollectionAllocErr::AllocError { .. }) => unreachable!(),
             Ok(table) => table,
         }
     }
